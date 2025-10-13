@@ -2,3 +2,10 @@
 
 
 https://g.co/gemini/share/1a1ad41c9b53
+
+
+
+# consigne 
+
+Créer le starter pack d’un étudiant de votre école. Les plus originaux ou drôles
+seront récompensés.
