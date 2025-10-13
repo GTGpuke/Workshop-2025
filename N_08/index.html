@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plans 3D de Poudlard et la Chambre des Secrets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* Styles personnalisés pour le jeu/la simulation */
+        body { margin: 0; overflow: hidden; font-family: 'Inter', sans-serif; background-color: #0d1117; }
+        canvas { display: block; }
+        #scene-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        #info-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(17, 24, 39, 0.9);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            max-width: 90%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="scene-container">
+        <div id="info-overlay" class="text-sm sm:text-base">
+            <h1 class="text-xl font-bold text-yellow-300 mb-1">Localisation de la Chambre des Secrets</h1>
+            <p>Plan stylisé de l'aile du château (Rotation automatique).</p>
+            <p class="mt-2 text-green-400 font-semibold">Le cube VERT ÉMERAUDE représente la Chambre des Secrets.</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Configuration de base
+        const container = document.getElementById('scene-container');
+        let scene, camera, renderer, castleGroup, clock;
+
+        // Configuration pour l'exponentielle backoff (non nécessaire pour les API Google ici, mais bonne pratique)
+        const MAX_RETRIES = 3;
+        const INITIAL_DELAY_MS = 1000;
+        
+        // Initialisation de la scène
+        function init() {
+            // Création de la scène
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0d1117);
+            clock = new THREE.Clock();
+
+            // Création de la caméra (Perspective)
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 0, 0);
+
+            // Création du rendu (Renderer)
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Groupe pour le château pour faciliter la rotation
+            castleGroup = new THREE.Group();
+            scene.add(castleGroup);
+
+            // Lumières
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 30, 10);
+            scene.add(directionalLight);
+
+            // Construction du plan de Poudlard
+            buildHogwartsPlans();
+
+            // Gestion de la taille de la fenêtre
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        /**
+         * Construit un modèle 3D stylisé de Poudlard (section de l'aile)
+         */
+        function buildHogwartsPlans() {
+            const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x5c4033, metalness: 0.1 });
+            const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x9e9e9e });
+            const doorMaterial = new THREE.MeshStandardMaterial({ color: 0xaa7e58 });
+            const paintingMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, emissive: 0x8b008b }); // Bonus: Tableaux (violet foncé)
+            const officeMaterial = new THREE.MeshStandardMaterial({ color: 0x2222ff, emissive: 0x000033 }); // Bonus: Bureau (bleu foncé)
+
+            const floorHeight = 5;
+            const wingWidth = 20;
+            const wingDepth = 10;
+            const numFloors = 4;
+
+            // 1. Structure générale (Mûrs bien définis)
+            for (let i = 0; i < numFloors; i++) {
+                const floorY = i * floorHeight;
+
+                // Plancher
+                const floor = new THREE.Mesh(new THREE.BoxGeometry(wingWidth + 2, 0.2, wingDepth + 2), floorMaterial);
+                floor.position.set(0, floorY - 0.1, 0);
+                castleGroup.add(floor);
+
+                if (i < numFloors - 1) { // Murs (sauf le dernier étage)
+                    // Murs (simplifiés)
+                    const wall1 = new THREE.Mesh(new THREE.BoxGeometry(wingWidth, floorHeight, 0.5), wallMaterial);
+                    wall1.position.set(0, floorY + floorHeight / 2, wingDepth / 2);
+                    castleGroup.add(wall1);
+
+                    const wall2 = new THREE.Mesh(new THREE.BoxGeometry(wingWidth, floorHeight, 0.5), wallMaterial);
+                    wall2.position.set(0, floorY + floorHeight / 2, -wingDepth / 2);
+                    castleGroup.add(wall2);
+
+                    const wall3 = new THREE.Mesh(new THREE.BoxGeometry(0.5, floorHeight, wingDepth), wallMaterial);
+                    wall3.position.set(wingWidth / 2, floorY + floorHeight / 2, 0);
+                    castleGroup.add(wall3);
+
+                    const wall4 = new THREE.Mesh(new THREE.BoxGeometry(0.5, floorHeight, wingDepth), wallMaterial);
+                    wall4.position.set(-wingWidth / 2, floorY + floorHeight / 2, 0);
+                    castleGroup.add(wall4);
+                }
+
+                // Portes (Éléments mandataires) - une porte par étage
+                const door = new THREE.Mesh(new THREE.BoxGeometry(1.5, floorHeight * 0.7, 0.1), doorMaterial);
+                door.position.set(wingWidth / 2, floorY + floorHeight * 0.35, 0);
+                castleGroup.add(door);
+
+                // Éléments Bonus (Bureaux et Tableaux)
+                if (i === 2) { // Deuxième étage (pour le bureau)
+                    const office = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), officeMaterial);
+                    office.position.set(-wingWidth / 4, floorY + 1, wingDepth / 4);
+                    castleGroup.add(office);
+                    office.userData.name = "Bureau du Professeur";
+
+                    const painting = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), paintingMaterial);
+                    painting.position.set(wingWidth / 4, floorY + 3, wingDepth / 2 - 0.3);
+                    castleGroup.add(painting);
+                    painting.userData.name = "Tableau Animé";
+                }
+
+                if (i === 3) { // Troisième étage (symbolique du 2nd étage pour le Canon)
+                    const bathroom = new THREE.Mesh(new THREE.BoxGeometry(4, 2, 4), new THREE.MeshStandardMaterial({ color: 0x55aaff, transparent: true, opacity: 0.5 }));
+                    bathroom.position.set(wingWidth / 4, floorY + 1, -wingDepth / 4);
+                    castleGroup.add(bathroom);
+                    bathroom.userData.name = "Toilettes du 2e étage (Mimi Geignarde)";
+                }
+            }
+
+
+            // 2. La Chambre des Secrets (myDiL) - Sous les toilettes du 2e étage
+            // Canoniquement, elle est loin sous le château, mais nous la plaçons sous le "2e étage" pour la référence.
+            const chamberGeometry = new THREE.BoxGeometry(10, 4, 10);
+            const chamberMaterial = new THREE.MeshLambertMaterial({
+                color: 0x00ff80, // Vert Émeraude pour le Basilisk/Serpentard
+                emissive: 0x008844, // Émission pour faire briller
+                opacity: 0.9,
+                transparent: true
+            });
+            const chamber = new THREE.Mesh(chamberGeometry, chamberMaterial);
+
+            // Positionnement: sous le deuxième étage (index 1), ou symboliquement au niveau du sous-sol.
+            const chamberY = 1 * floorHeight - floorHeight / 2; // Sous le 2e étage (symboliquement)
+            chamber.position.set(0, chamberY - 4, 0);
+            castleGroup.add(chamber);
+
+            // Ajout d'une ligne pour la surbrillance (Optionnel, mais renforce l'effet)
+            const edges = new THREE.EdgesGeometry(chamberGeometry);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffff00 }));
+            line.position.copy(chamber.position);
+            castleGroup.add(line);
+
+            chamber.userData.name = "La Chambre des Secrets (mise en surbrillance)";
+        }
+
+        /**
+         * Gère le redimensionnement de la fenêtre.
+         */
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        /**
+         * Boucle d'animation pour la rotation (Élément mandataire).
+         */
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+
+            // Rotation douce et constante de la maquette
+            castleGroup.rotation.y += 0.2 * delta;
+            castleGroup.rotation.x = Math.sin(clock.elapsedTime * 0.1) * 0.05; // Très légère oscillation
+
+            renderer.render(scene, camera);
+        }
+
+        // Lancement de l'application
+        window.onload = function() {
+            init();
+            animate();
+        };
+
+    </script>
+</body>
+</html>
