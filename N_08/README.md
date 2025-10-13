@@ -2,7 +2,7 @@
 
 https://g.co/gemini/share/13594e022083
 
-## Où estla chambre des secrets ?
+## Où est la chambre des secrets ?
 
 Afin de trouver la chambre des secrets, il faudrait déjà connaître les plans de
 Poudlard !
