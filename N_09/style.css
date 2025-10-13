@@ -1,0 +1,68 @@
+/* General styling for the page body */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+/* The loading screen container */
+#loader-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* --- REMOVED: background-color: #1a1a1a; --- */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+    position: relative; 
+}
+
+/* Canvas for particles */
+#particle-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Sits behind the fox */
+}
+
+/* The element that displays the fox animation */
+#fox-loader {
+    width: 200px;
+    height: 200px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    animation: walkCycle 1.5s steps(1, end) infinite;
+    position: relative;
+    z-index: 2; /* Sits in front of the canvas */
+    filter: drop-shadow(0 0 8px rgba(0, 191, 255, 0.7));
+}
+
+/* Keyframes for the fox animation */
+@keyframes walkCycle {
+    0% { background-image: url('Gemini_Generated_Image_wq4di2wq4di2wq4d_1_-removebg-preview.png'); }
+    16% { background-image: url('Gemini_Generated_Image_wq4di2wq4di2wq4d-removebg-preview.png'); }
+    32% { background-image: url('Gemini_Generated_Image_6x4sul6x4sul6x4s-removebg-preview.png'); }
+    48% { background-image: url('Gemini_Generated_Image_525c57525c57525c-removebg-preview.png'); }
+    64% { background-image: url('Gemini_Generated_Image_6x4sul6x4sul6x4s-removebg-preview.png'); }
+    80%, 100% { background-image: url('Gemini_Generated_Image_wq4di2wq4di2wq4d-removebg-preview.png'); }
+}
+
+/* The main content of your page, hidden by default */
+#main-content {
+    display: none;
+    padding: 40px;
+    text-align: center;
+}
+
+/* Utility class to hide the loading screen */
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
