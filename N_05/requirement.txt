@@ -1,0 +1,6 @@
+# Nom du fichier : requirements.txt
+# Rôle : Lister les dépendances du projet Python.
+
+Flask==2.2.2
+gunicorn==20.1.0
+# ... autres dépendances

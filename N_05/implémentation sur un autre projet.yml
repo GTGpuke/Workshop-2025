@@ -1,0 +1,11 @@
+# Nom du fichier : .gitlab-ci.yml
+# Rôle : Importer la CI/CD centralisée.
+
+include:
+  - project: 'mon-groupe/ci-templates'
+    ref: main # ou une version spécifique comme 'v1.2'
+    file: '/python-ci-template.yml'
+
+# Vous pouvez surcharger des variables si ce projet a des spécificités
+variables:
+  SONAR_PROJECT_KEY: "mon-super-projet-2"

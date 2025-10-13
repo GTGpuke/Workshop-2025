@@ -1,0 +1,145 @@
+# Nom du fichier : .gitlab-ci.yml
+# Rôle : Orchestrateur principal du pipeline CI/CD.
+
+# Définition des étapes dans l'ordre d'exécution
+stages:
+  - test      # Tests unitaires, de non-régression et linting
+  - analysis  # Analyse de la qualité du code
+  - build     # Construction de l'image Docker
+  - deploy    # Déploiement en production
+
+# ===================================================================
+# ÉTAPE 1: TESTS ET VÉRIFICATION DES NORMES
+# ===================================================================
+
+# Job pour un projet Python (à adapter pour JS)
+lint-and-unit-tests:
+  stage: test
+  image: python:3.10-slim
+  before_script:
+    - pip install -r requirements.txt
+    - pip install flake8 pytest pytest-cov
+  script:
+    # 1. Vérification de la norme de code PEP8
+    - echo "Vérification des normes PEP8..."
+    - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    # 2. Tests unitaires avec génération du rapport de couverture
+    - echo "Lancement des tests unitaires..."
+    - pytest --cov=src/ --junitxml=report.xml --cov-report=xml:coverage.xml # Génère les rapports pour GitLab et SonarQube
+  artifacts:
+    when: always
+    paths:
+      - report.xml
+      - coverage.xml
+    reports:
+      junit: report.xml
+
+# Job pour les tests de non-régression (ex: tests d'API)
+regression-tests:
+  stage: test
+  image: python:3.10-slim
+  before_script:
+    - pip install -r requirements.txt
+    - pip install requests
+  script:
+    - echo "Lancement des tests de non-régression..."
+    - python tests/test_api.py # Lancez ici votre script de tests de non-régression
+
+# ===================================================================
+# ÉTAPE 2: ANALYSE DE QUALITÉ AVEC SONARQUBE
+# ===================================================================
+
+sonarqube-analysis:
+  stage: analysis
+  image: sonarsource/sonar-scanner-cli:latest
+  entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - >
+      sonar-scanner
+      -Dsonar.projectKey=${CI_PROJECT_NAME}
+      -Dsonar.sources=.
+      -Dsonar.host.url=${SONAR_HOST_URL}
+      -Dsonar.login=${SONAR_TOKEN}
+      -Dsonar.python.coverage.reportPaths=coverage.xml
+      -Dsonar.qualitygate.wait=true # POINT CLÉ: le pipeline attend le résultat et échoue si la Quality Gate n'est pas passée
+  dependencies:
+    - lint-and-unit-tests # Récupère les artifacts (coverage.xml) du job précédent
+  allow_failure: false # Le pipeline s'arrête si la Quality Gate SonarQube échoue.
+
+# ===================================================================
+# ÉTAPE 3: CONSTRUCTION ET TEST DE L'IMAGE DOCKER
+# ===================================================================
+
+build-and-test-docker:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    # Connexion automatique au registre GitLab
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    # Tags pour l'image : un unique et un "latest"
+    - IMAGE_TAG_UNIQUE="$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+    - IMAGE_TAG_LATEST="$CI_REGISTRY_IMAGE:latest"
+    # 1. Construction de l'image
+    - docker build -t "$IMAGE_TAG_UNIQUE" -t "$IMAGE_TAG_LATEST" .
+    # 2. Test de l'image (Smoke Test)
+    - echo "Test de l'image Docker..."
+    - docker run -d --name test-container "$IMAGE_TAG_UNIQUE"
+    - sleep 15 # Attendre que l'application démarre
+    - docker logs test-container # Vérifier les logs de démarrage
+    - >
+      if ! docker ps | grep -q "test-container"; then
+        echo "Le conteneur n'a pas démarré correctement."
+        exit 1
+      else
+        echo "Le conteneur est en cours d'exécution. Test réussi."
+      fi
+    - docker stop test-container
+    - docker rm test-container
+    # 3. Push de l'image vers le registre GitLab
+    - docker push "$IMAGE_TAG_UNIQUE"
+    - docker push "$IMAGE_TAG_LATEST"
+
+# ===================================================================
+# ÉTAPE 4: DÉPLOIEMENT
+# ===================================================================
+
+deploy-production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk update && apk add openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts
+  script:
+    - echo "Déploiement sur le serveur de production..."
+    - >
+      ssh ${SSH_USER}@${SSH_HOST} "
+      set -e;
+      echo 'Connexion au registre...';
+      docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY};
+      echo 'Mise à jour de l'image...';
+      docker pull ${CI_REGISTRY_IMAGE}:latest;
+      echo 'Arrêt et suppression de l'ancien conteneur...';
+      docker stop prod-container || true && docker rm prod-container || true;
+      echo 'Lancement du nouveau conteneur...';
+      docker run -d --name prod-container --restart always -p 80:5000 ${CI_REGISTRY_IMAGE}:latest;
+      echo 'Nettoyage des anciennes images...';
+      docker image prune -f;
+      echo 'Déploiement terminé !'
+      "
+  rules:
+    # Ce job s'exécute SEULEMENT si on est sur la branche 'main' ET si les jobs précédents ont réussi.
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
