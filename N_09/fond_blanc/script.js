@@ -1,70 +1,57 @@
-// --- PART 1: HIDE LOADER ON PAGE LOAD ---
+// // PART 1: HIDE LOADER ON PAGE LOAD
 
-window.addEventListener('load', function() {
-    const loaderWrapper = document.getElementById('loader-wrapper');
-    const mainContent = document.getElementById('main-content');
+// window.addEventListener('load', function() {
+//     const loaderWrapper = document.getElementById('loader-wrapper');
     
-    setTimeout(() => {
-        loaderWrapper.classList.add('hidden');
-        mainContent.style.display = 'block';
-    }, 200);
-});
+//     // Step 1: Add the 'hidden' class to trigger the fade-out animation
+//     loaderWrapper.classList.add('hidden');
+
+//     // Step 2: After the transition finishes (500ms), set display to 'none'
+//     setTimeout(() => {
+//         loaderWrapper.style.display = 'none';
+//     }, 500); // This time must match the CSS transition time
+// });
 
 
-// --- PART 2: ANIMATED PARTICLES LOGIC ---
+// PART 2: ANIMATED PARTICLES LOGIC
 
 const canvas = document.getElementById('particle-canvas');
 const ctx = canvas.getContext('2d');
-
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
 let particlesArray = [];
-const numberOfParticles = 80; // A few more particles for a denser sparkle effect
-
-// --- MODIFIED: Tighter spawn area around the fox ---
+const numberOfParticles = 80;
 const spawnZoneWidth = 250;
 const spawnZoneHeight = 250;
 
 class Particle {
-    constructor() {
-        this.reset();
+    constructor() { 
+        this.reset(); 
     }
     
-    // --- NEW: Reset method to initialize and respawn particles ---
     reset() {
         const spawnX = (canvas.width / 2) - (spawnZoneWidth / 2);
         const spawnY = (canvas.height / 2) - (spawnZoneHeight / 2);
         this.x = spawnX + Math.random() * spawnZoneWidth;
         this.y = spawnY + Math.random() * spawnZoneHeight;
-        
-        // --- MODIFIED: Smaller size for a sparkle effect ---
-        this.size = Math.random() * 1.5 + 0.5; // Size between 0.5px and 2px
-        
-        // --- MODIFIED: Slower, more subtle movement ---
+        this.size = Math.random() * 1.5 + 0.5;
         this.speedY = Math.random() * 0.5 - 0.25;
         this.speedX = Math.random() * 0.5 - 0.25;
-
-        // --- NEW: Lifespan for fading effect ---
-        this.life = Math.random() * 60 + 30; // Lifespan of 30-90 frames
+        this.life = Math.random() * 60 + 30;
         this.initialLife = this.life;
     }
     
     update() {
         this.x += this.speedX;
         this.y += this.speedY;
-        this.life--; // Decrease life every frame
-
-        // Reset particle when its life runs out
-        if (this.life <= 0) {
-            this.reset();
+        this.life--;
+        if (this.life <= 0) { 
+            this.reset(); 
         }
     }
     
     draw() {
-        // --- NEW: Calculate opacity based on remaining life to create a fade-out effect ---
-        const opacity = Math.max(0, (this.life / this.initialLife) * 0.8); // Max opacity of 0.8
-        
+        const opacity = Math.max(0, (this.life / this.initialLife) * 0.8);
         ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);

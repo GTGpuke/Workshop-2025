@@ -1,0 +1,66 @@
+/* General styling for the page body */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+/* The loading screen container */
+#loader-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    position: relative; 
+    transition: opacity 0.5s ease;
+}
+
+/* Canvas for particles */
+#particle-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3; 
+}
+
+/* The element that displays the fox animation */
+#fox-loader {
+    width: 200px;
+    height: 200px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    animation: walkCycle 1.5s steps(1, end) infinite;
+    position: relative;
+    z-index: 2;
+    transform: translateY(-15px);
+}
+
+/* Keyframes for the fox animation */
+@keyframes walkCycle {
+    0% { background-image: url('Gemini_Generated_Image_wq4di2wq4di2wq4d(1).png'); }
+    16% { background-image: url('Gemini_Generated_Image_wq4di2wq4di2wq4d.png'); }
+    32% { background-image: url('Gemini_Generated_Image_6x4sul6x4sul6x4s.png'); }
+    48% { background-image: url('Gemini_Generated_Image_525c57525c57525c.png'); }
+    64% { background-image: url('Gemini_Generated_Image_6x4sul6x4sul6x4s.png'); }
+    80%, 100% { background-image: url('Gemini_Generated_Image_wq4di2wq4di2wq4d.png'); }
+}
+
+/* The main content of the page */
+#main-content {
+    padding: 40px;
+    text-align: center;
+}
+
+/* .hidden class to control opacity */
+.hidden {
+    opacity: 0;
+    pointer-events: none; /* Prevents interaction while fading */
+}
