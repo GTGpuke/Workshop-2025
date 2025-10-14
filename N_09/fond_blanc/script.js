@@ -1,16 +1,16 @@
-// // PART 1: HIDE LOADER ON PAGE LOAD
+// PART 1: HIDE LOADER ON PAGE LOAD
 
-// window.addEventListener('load', function() {
-//     const loaderWrapper = document.getElementById('loader-wrapper');
+window.addEventListener('load', function() {
+    const loaderWrapper = document.getElementById('loader-wrapper');
     
-//     // Step 1: Add the 'hidden' class to trigger the fade-out animation
-//     loaderWrapper.classList.add('hidden');
+    // Step 1: Add the 'hidden' class to trigger the fade-out animation
+    loaderWrapper.classList.add('hidden');
 
-//     // Step 2: After the transition finishes (500ms), set display to 'none'
-//     setTimeout(() => {
-//         loaderWrapper.style.display = 'none';
-//     }, 500); // This time must match the CSS transition time
-// });
+    // Step 2: After the transition finishes (500ms), set display to 'none'
+    setTimeout(() => {
+        loaderWrapper.style.display = 'none';
+    }, 500); // This time must match the CSS transition time
+});
 
 
 // PART 2: ANIMATED PARTICLES LOGIC
