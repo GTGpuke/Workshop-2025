@@ -1,5 +1,7 @@
 // N_05/fond_transparent/non-regression-tests.js
 
+/* eslint-disable no-console */
+
 const fs = require('fs');
 const path = require('path');
 
@@ -41,14 +43,13 @@ const testLoaderHidingLogic = () => {
   }
 };
 
-
 // --- Run All Tests ---
 
 console.log('--- Running Custom Non-Regression Tests ---');
 
 const results = [
   test('HTML file should contain the essential structure', testHtmlStructure),
-  test('JavaScript file should contain the loader hiding logic', testLoaderHidingLogic)
+  test('JavaScript file should contain the loader hiding logic', testLoaderHidingLogic),
 ];
 
 console.log('-------------------------------------------');
