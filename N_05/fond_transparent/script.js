@@ -69,10 +69,10 @@ function init() {
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (const particle of particlesArray) {
+  particlesArray.forEach((particle) => {
     particle.update();
     particle.draw();
-  }
+  });
   requestAnimationFrame(animate);
 }
 
