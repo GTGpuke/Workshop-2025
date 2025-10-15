@@ -2,8 +2,8 @@
 
 /* eslint-disable no-console */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 // A simple function to log successes and failures
 const test = (name, assertion) => {

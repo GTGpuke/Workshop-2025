@@ -27,7 +27,7 @@ describe('Particle Class', () => {
     expect(particle.x).toBeGreaterThanOrEqual(0);
     expect(particle.y).toBeGreaterThanOrEqual(0);
     expect(particle.size).toBeGreaterThanOrEqual(0.5);
-    expect(particle.size).toBeLessThanOrEqual(2.0);
+    expect(particle.size).toBeLessThanOrEqual(2);
     expect(particle.life).toBeGreaterThan(0);
   });
 
