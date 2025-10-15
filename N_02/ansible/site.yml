@@ -1,0 +1,60 @@
+---
+- hosts: docker_hosts
+  become: true
+  tasks:
+    - name: "Pré-requis : Installation des dépendances système"
+      apt:
+        name: ['docker.io', 'docker-compose-plugin', 'ufw']
+        state: present
+        update_cache: yes
+
+    - name: "Configuration : Création du répertoire projet"
+      file:
+        path: "{{ project_path }}"
+        state: directory
+        mode: "0755"
+
+    - name: "Déploiement : Génération du docker-compose.yml à partir du template"
+      template:
+        src: files/docker-compose.yml
+        dest: "{{ project_path }}/docker-compose.yml"
+
+    - name: "PRA : Copie et configuration du script de backup"
+      block:
+        - copy:
+            src: files/backup.sh
+            dest: /usr/local/bin/daily-backup.sh
+            mode: "0755"
+        - cron:
+            name: "Dockerwarts Daily Backup"
+            minute: "0"
+            hour: "3"
+            job: "/usr/local/bin/daily-backup.sh"
+
+    - name: "Sécurité : Configuration des règles de pare-feu (UFW)"
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - "22" # SSH
+        - "{{ glpi_port }}"
+        - "{{ grafana_port }}"
+        - "{{ es_port }}"
+        - "{{ cassandra_port }}"
+
+    - name: "Haute Disponibilité : Vérification de l'état de Docker Swarm"
+      command: docker info
+      register: docker_info
+      changed_when: false
+
+    - name: "Haute Disponibilité : Initialisation de Swarm si nécessaire"
+      command: docker swarm init --advertise-addr {{ ansible_host }}
+      when: "'Swarm: inactive' in docker_info.stdout"
+
+    - name: "Démarrage : Déploiement de la stack DOCKERWARTS en mode Swarm"
+      community.docker.docker_stack:
+        state: present
+        name: dockerwarts
+        compose:
+          - "{{ project_path }}/docker-compose.yml"

@@ -1,0 +1,8 @@
+# Chemin d'installation sur le serveur
+project_path: "/opt/dockerwarts"
+
+# Mappage des ports des services
+glpi_port: 8080
+grafana_port: 3000
+es_port: 9200
+cassandra_port: 9042
