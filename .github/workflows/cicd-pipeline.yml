@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - 'N_05/fond_transparent/**' # Trigger only for this folder
+      - 'N_05/fond_transparent/**'
 
 jobs:
   build-and-test:
@@ -26,16 +26,24 @@ jobs:
           node-version: '20'
 
       - name: 📦 Install dependencies
-        working-directory: ./N_05/fond_transparent # Set working directory
+        working-directory: ./N_05/fond_transparent
         run: npm install
 
       - name: 🧪 Run Unit Tests with Jest
         working-directory: ./N_05/fond_transparent
         run: npm test
 
-      - name: 🖼️ Run Visual Non-Regression Tests with Cypress
+      - name: 🖼️ Run Cypress Tests & Capture Screenshots
         working-directory: ./N_05/fond_transparent
         run: npm run cy:run
+
+      - name: 📤 Upload Cypress Screenshots
+        uses: actions/upload-artifact@v4
+        if: always() # This ensures screenshots are uploaded even if tests fail
+        with:
+          name: cypress-screenshots
+          path: N_05/fond_transparent/cypress/screenshots
+          retention-days: 7
 
       - name: ✨ Lint Code with ESLint (Airbnb Style)
         working-directory: ./N_05/fond_transparent
@@ -47,7 +55,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-            projectBaseDir: N_05/fond_transparent # Tell Sonar where the project is
+            projectBaseDir: N_05/fond_transparent
             args: >
               -Dsonar.organization=your-sonar-organization
               -Dsonar.projectKey=your-sonar-project-key
