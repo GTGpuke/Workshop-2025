@@ -18,6 +18,7 @@ body {
     z-index: 1000;
     position: relative; 
     transition: opacity 0.5s ease;
+    background-color: #ffffff;
 }
 
 /* Canvas for particles */
@@ -30,27 +31,25 @@ body {
     z-index: 3; 
 }
 
-/* The element that displays the fox animation */
-#fox-loader {
+/* The element that displays the snake animation */
+#snake-loader {
     width: 200px;
     height: 200px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    animation: walkCycle 1.5s steps(1, end) infinite;
+    animation: walkCycle 1.0s steps(1, end) infinite;
     position: relative;
     z-index: 2;
     transform: translateY(-15px);
 }
 
-/* Keyframes for the fox animation */
+/* Keyframes for the animation */
 @keyframes walkCycle {
-    0% { background-image: url('Gemini_Generated_Image_wq4di2wq4di2wq4d(1).png'); }
-    16% { background-image: url('Gemini_Generated_Image_wq4di2wq4di2wq4d.png'); }
-    32% { background-image: url('Gemini_Generated_Image_6x4sul6x4sul6x4s.png'); }
-    48% { background-image: url('Gemini_Generated_Image_525c57525c57525c.png'); }
-    64% { background-image: url('Gemini_Generated_Image_6x4sul6x4sul6x4s.png'); }
-    80%, 100% { background-image: url('Gemini_Generated_Image_wq4di2wq4di2wq4d.png'); }
+    0% { background-image: url('Gemini_Generated_Image_omc8lnomc8lnomc8.png'); }
+    25% { background-image: url('Gemini_Generated_Image_j0dp30j0dp30j0dp.png'); }
+    50% { background-image: url('Gemini_Generated_Image_7z1bci7z1bci7z1b.png'); }
+    75%, 100% { background-image: url('Gemini_Generated_Image_j0dp30j0dp30j0dp.png'); }
 }
 
 /* The main content of the page */
@@ -62,5 +61,5 @@ body {
 /* .hidden class to control opacity */
 .hidden {
     opacity: 0;
-    pointer-events: none; /* Prevents interaction while fading */
+    pointer-events: none;
 }
