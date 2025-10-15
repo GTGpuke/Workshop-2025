@@ -41,15 +41,13 @@ jobs:
         working-directory: N_05/fond_transparent
         run: npx eslint . --ext .js
 
+      - name: 🐳 Lint Dockerfile with Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: N_05/fond_transparent/Dockerfile
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-            projectBaseDir: N_05/fond_transparent
-            args: >
-              -Dsonar.organization=gtgpuke
-              -Dsonar.projectKey=GTGpuke_Workshop-2025
-              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-              -Dsonar.coverage.exclusions=**/*.test.js,**/*-tests.js
+          SONAR_TOKEN: ${{ secrets.SON
