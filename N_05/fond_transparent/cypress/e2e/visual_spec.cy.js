@@ -1,14 +1,14 @@
-// N_09/fond_transparent/cypress/e2e/visual_spec.cy.js
+// N_05/fond_transparent/cypress/e2e/visual_spec.cy.js
 
 describe('Visual Regression for Snake Loader', () => {
   beforeEach(() => {
-    // Visit the HTML file relative to the project root
-    cy.visit('N_09/fond_transparent/index.html');
+    // This path is now corrected to N_05
+    cy.visit('N_05/fond_transparent/index.html');
   });
 
   // Test 1: Checks the final state after the loader disappears.
   it('should match the main content after loading is complete', () => {
-    // Wait for the loader to become invisible (it has a 500ms transition)
+    // Wait for the loader to become invisible
     cy.get('#loader-wrapper', { timeout: 6000 }).should('not.be.visible');
     
     // Take a snapshot of just the main content area
