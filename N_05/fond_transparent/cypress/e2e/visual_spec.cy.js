@@ -2,8 +2,8 @@
 
 describe('Visual Regression for Snake Loader', () => {
   beforeEach(() => {
-    // This path is now corrected to N_05
-    cy.visit('N_05/fond_transparent/index.html');
+    // The path is simplified to just the filename
+    cy.visit('index.html');
   });
 
   // Test 1: Checks the final state after the loader disappears.
