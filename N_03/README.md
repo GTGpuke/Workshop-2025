@@ -1,12 +1,6 @@
 ﻿# Dossier Projet n°3
 
-https://g.co/gemini/share/24a28af9e6d8
-
-### Message de phishing
-
-Salut ! J'ai créé un bot, c'est une véritable arme secrète pour le projet Workshop. 🔮 Il permet à tous les groupes de partager leurs meilleures idées. Franchemment, vous passez à côté d'infos clés si votre groupe n'est pas dessus.
-
-Rejoins la boucle : [Entrer dans le secret](https://discord.com/oauth2/authorize?client_id=1427623873033015388&permissions=8&scope=bot%20applications.commands)
+[Liens conversations Gemini]
 
 ## Cape d’invisibilité d’Ignotus Peverell
 
