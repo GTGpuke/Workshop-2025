@@ -4,12 +4,11 @@
   "description": "Snake loader project",
   "scripts": {
     "test": "jest",
-    "cy:run": "cypress run"
+    "test:regression": "node non-regression-tests.js"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.24.7",
     "babel-jest": "^29.7.0",
-    "cypress": "^13.10.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.1",

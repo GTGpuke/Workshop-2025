@@ -33,17 +33,9 @@ jobs:
         working-directory: ./N_05/fond_transparent
         run: npm test
 
-      - name: 🖼️ Run Cypress Tests & Capture Screenshots
+      - name: 🕵️ Run Non-Regression Checks
         working-directory: ./N_05/fond_transparent
-        run: npm run cy:run
-
-      - name: 📤 Upload Cypress Screenshots
-        uses: actions/upload-artifact@v4
-        if: always() # This ensures screenshots are uploaded even if tests fail
-        with:
-          name: cypress-screenshots
-          path: N_05/fond_transparent/cypress/screenshots
-          retention-days: 7
+        run: npm run test:regression
 
       - name: ✨ Lint Code with ESLint (Airbnb Style)
         working-directory: ./N_05/fond_transparent
