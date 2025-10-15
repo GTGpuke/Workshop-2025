@@ -1,0 +1,13 @@
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\obj\Debug\net8.0\WigorSchedule.Core.csproj.AssemblyReference.cache
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\obj\Debug\net8.0\WigorSchedule.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\obj\Debug\net8.0\WigorSchedule.Core.AssemblyInfoInputs.cache
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\obj\Debug\net8.0\WigorSchedule.Core.AssemblyInfo.cs
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\obj\Debug\net8.0\WigorSchedule.Core.csproj.CoreCompileInputs.cache
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\obj\Debug\net8.0\WigorSchedule.Core.sourcelink.json
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\bin\Debug\net8.0\WigorSchedule.Core.deps.json
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\bin\Debug\net8.0\WigorSchedule.Core.dll
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\bin\Debug\net8.0\WigorSchedule.Core.pdb
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\obj\Debug\net8.0\WigorSchedule.Core.dll
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\obj\Debug\net8.0\refint\WigorSchedule.Core.dll
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\obj\Debug\net8.0\WigorSchedule.Core.pdb
+C:\Users\pierr\Desktop\5ème année\Workshop-2025\N_13\WigorSchedule.Core\obj\Debug\net8.0\ref\WigorSchedule.Core.dll
