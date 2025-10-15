@@ -5,7 +5,6 @@ const { addMatchImageSnapshotPlugin } = require('@simonsmith/cypress-image-snaps
 
 module.exports = defineConfig({
   e2e: {
-    supportFile: false,
     setupNodeEvents(on, config) {
       addMatchImageSnapshotPlugin(on, config);
     },
