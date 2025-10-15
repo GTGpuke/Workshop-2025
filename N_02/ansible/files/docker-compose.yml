@@ -1,0 +1,149 @@
+version: "3.8"
+
+volumes:
+  # Un volume unique partagé par tous les noeuds MariaDB (simplifié pour un seul hôte)
+  # Dans un vrai cluster multi-hôtes, il faudrait un stockage réseau partagé (NFS, GlusterFS...)
+  mariadb_data:
+  glpi_data:
+  es_data:
+  grafana_data:
+  cassandra_data:
+
+networks:
+  frontend:
+  backend:
+
+services:
+  # --- Service Base de Données en Haute Disponibilité ---
+  mariadb:
+    image: bitnami/mariadb-galera:latest
+    networks:
+      - backend
+    # Le port n'est pas exposé car seul GLPI doit y accéder
+    environment:
+      # --- Configuration de la base et des utilisateurs ---
+      - MARIADB_ROOT_PASSWORD=root_password
+      - MARIADB_DATABASE=glpi_db
+      - MARIADB_USER=glpi_user
+      - MARIADB_PASSWORD=glpi_password
+      # --- Configuration du Cluster Galera ---
+      - MARIADB_GALERA_CLUSTER_NAME=dockerwarts-db-cluster
+      - MARIADB_GALERA_CLUSTER_ADDRESS=gcomm://mariadb
+      - MARIADB_GALERA_MARIABACKUP_PASSWORD=mariabackup_password
+    volumes:
+      - mariadb_data:/bitnami/mariadb
+    deploy:
+      replicas: 3 # On déploie 3 noeuds pour un cluster robuste
+      update_config:
+        parallelism: 1
+        order: start-first # Important pour ne pas arrêter tout le cluster
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
+  # --- Services Applicatifs ---
+  glpi:
+    image: diouxx/glpi:latest
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    ports:
+      - "{{ glpi_port }}:80"
+    environment:
+      # On pointe vers le nom du service, Swarm s'occupe de trouver un noeud actif
+      DB_HOST: mariadb
+      DB_PORT: "3306"
+      DB_DATABASE: glpi_db
+      DB_USERNAME: glpi_user
+      DB_PASSWORD: glpi_password
+    volumes:
+      - glpi_data:/var/www/html/glpi
+    networks:
+      - backend
+      - frontend
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:80 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.22
+    restart: unless-stopped
+    ports:
+      - "{{ es_port }}:9200"
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - backend
+    deploy:
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+    ports:
+      - "{{ grafana_port }}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=changeme
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - backend
+      - frontend
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  cassandra:
+    image: cassandra:4.1
+    restart: unless-stopped
+    ports:
+      - "{{ cassandra_port }}:9042"
+    environment:
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEWSIZE=128M
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - backend
+    deploy:
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
