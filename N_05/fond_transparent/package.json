@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Snake loader project",
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
     "test:regression": "node non-regression-tests.js"
   },
   "devDependencies": {

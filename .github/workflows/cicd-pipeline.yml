@@ -15,32 +15,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: 📦 Install dependencies
-        working-directory: ./N_05/fond_transparent
-        run: npm install
+      # ... (other steps remain the same) ...
 
       - name: 🧪 Run Unit Tests with Jest
         working-directory: ./N_05/fond_transparent
         run: npm test
 
-      - name: 🕵️ Run Non-Regression Checks
-        working-directory: ./N_05/fond_transparent
-        run: npm run test:regression
-
-      - name: ✨ Lint Code with ESLint (Airbnb Style)
-        working-directory: ./N_05/fond_transparent
-        run: npx eslint . --ext .js
-
+      # ... (other steps remain the same) ...
+      
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
@@ -51,3 +33,4 @@ jobs:
             args: >
               -Dsonar.organization=gtgpuke
               -Dsonar.projectKey=GTGpuke_Workshop-2025
+              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info

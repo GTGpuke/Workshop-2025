@@ -18,6 +18,12 @@
         "classes": true,
         "variables": true
       }
+    ],
+    "no-restricted-syntax": [
+      "error",
+      "ForInStatement",
+      "LabeledStatement",
+      "WithStatement"
     ]
   }
 }
