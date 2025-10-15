@@ -19,9 +19,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 
-
-      - name: 📄 List files in the repository
-        run: ls -R
         
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
@@ -55,3 +52,4 @@ jobs:
               -Dsonar.organization=gtgpuke
               -Dsonar.projectKey=GTGpuke_Workshop-2025
               -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+              -Dsonar.coverage.exclusions=**/*.test.js,**/*-tests.js
