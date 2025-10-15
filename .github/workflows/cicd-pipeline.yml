@@ -1,0 +1,53 @@
+# .github/workflows/cicd-pipeline.yml
+
+name: CI/CD Pipeline for Snake Loader
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'N_05/fond_transparent/**' # Trigger only for this folder
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Install dependencies
+        working-directory: ./N_05/fond_transparent # Set working directory
+        run: npm install
+
+      - name: 🧪 Run Unit Tests with Jest
+        working-directory: ./N_05/fond_transparent
+        run: npm test
+
+      - name: 🖼️ Run Visual Non-Regression Tests with Cypress
+        working-directory: ./N_05/fond_transparent
+        run: npm run cy:run
+
+      - name: ✨ Lint Code with ESLint (Airbnb Style)
+        working-directory: ./N_05/fond_transparent
+        run: npx eslint . --ext .js
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+            projectBaseDir: N_05/fond_transparent # Tell Sonar where the project is
+            args: >
+              -Dsonar.organization=your-sonar-organization
+              -Dsonar.projectKey=your-sonar-project-key
