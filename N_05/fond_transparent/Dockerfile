@@ -1,10 +1,15 @@
 # Use the official Nginx image from Docker Hub.
-# The 'alpine' tag refers to a minimal, lightweight version of Linux.
 FROM nginx:stable-alpine
 
-# Copy your website files from your current directory
-# into the default Nginx web root directory inside the container.
-COPY . /usr/share/nginx/html
+# Copy only the specific files needed for the website
+# into the Nginx web root directory.
+COPY index.html \
+     style.css \
+     script.js \
+     Gemini_Generated_Image_omc8lnomc8lnomc8-removebg-preview.png \
+     Gemini_Generated_Image_j0dp30j0dp30j0dp-removebg-preview.png \
+     Gemini_Generated_Image_7z1bci7z1bci7z1b-removebg-preview.png \
+     /usr/share/nginx/html/
 
-# Tell Docker that the container listens on port 80 at runtime.
+# Tell Docker that the container listens on port 80.
 EXPOSE 80
