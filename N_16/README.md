@@ -1,7 +1,7 @@
 ﻿# Dossier Projet
 Ceci est le fichier README pour le dossier projet.
 
-https://gemini.google.com/share/534de3f04a6f
+https://gemini.google.com/share/f74d5f430407
 
 commande de démarrage:
 
