@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WigorSchedule.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+923201ce4d16a8aaf926f054f12ec4b2108a52f8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5775a4e1378a6dd7472fa6d931d89bdbc407b676")]
 [assembly: System.Reflection.AssemblyProductAttribute("WigorSchedule.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WigorSchedule.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
