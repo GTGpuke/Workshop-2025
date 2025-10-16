@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail de l'Apprenti Sorcier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://alcdn.msauth.net/browser/2.14.2/js/msal-browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-magic {
+            font-family: 'Cinzel Decorative', cursive;
+        }
+        .main-content {
+            min-height: calc(100vh - 200px);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+    <div id="app" class="container mx-auto p-4 md:p-8">
+
+        <!-- En-tête -->
+        <header class="flex justify-between items-center mb-8 pb-4 border-b border-purple-400 border-opacity-30">
+            <h1 class="text-3xl md:text-4xl font-magic text-purple-300">Portail de l'Apprenti Sorcier</h1>
+            <div id="auth-container">
+                <button id="login-button" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition duration-300">
+                    Connexion via Grimoire Microsoft
+                </button>
+                <div id="user-profile" class="hidden items-center">
+                    <div class="text-right mr-4">
+                        <p id="user-name" class="font-bold"></p>
+                        <p id="user-email" class="text-sm text-gray-400"></p>
+                    </div>
+                    <button id="logout-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition duration-300">
+                        Déconnexion
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contenu principal (nécessite une connexion) -->
+        <main id="main-content" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Navigation -->
+                <aside class="md:col-span-1">
+                    <nav class="bg-gray-800 bg-opacity-50 rounded-lg p-4 sticky top-8">
+                        <h2 class="font-magic text-xl mb-4 text-purple-300">Sortilèges</h2>
+                        <ul>
+                            <li><a href="#" class="nav-link active-link block py-2 px-4 rounded hover:bg-purple-500 hover:bg-opacity-20 transition duration-200" data-target="inbox">Chouette Express (Emails)</a></li>
+                            <li><a href="#" class="nav-link block py-2 px-4 rounded hover:bg-purple-500 hover:bg-opacity-20 transition duration-200" data-target="calendar">Oracles & Potions (Calendrier)</a></li>
+                            <li><a href="#" class="nav-link block py-2 px-4 rounded hover:bg-purple-500 hover:bg-opacity-20 transition duration-200" data-target="tasks">Quêtes & Parchemins (Tâches)</a></li>
+                            <li><a href="#" class="nav-link block py-2 px-4 rounded hover:bg-purple-500 hover:bg-opacity-20 transition duration-200" data-target="documentation">Documentation du Middleware</a></li>
+                        </ul>
+                    </nav>
+                </aside>
+
+                <!-- Vues de contenu -->
+                <div class="md:col-span-3">
+                    <div id="view-inbox" class="content-view">
+                        <h2 class="text-2xl font-magic mb-6 text-purple-300">Boîte de réception</h2>
+                        <button id="compose-button" class="mb-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Nouvelle Chouette</button>
+                        <div id="compose-view" class="hidden bg-gray-800 p-4 rounded-lg mb-4">
+                             <!-- Formulaire d'envoi de mail -->
+                             <form id="send-mail-form">
+                                <div class="mb-2">
+                                    <label for="recipient" class="block text-sm font-bold mb-1">Destinataire (Email):</label>
+                                    <input type="email" id="recipient" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div class="mb-2">
+                                    <label for="subject" class="block text-sm font-bold mb-1">Sujet:</label>
+                                    <input type="text" id="subject" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div class="mb-2">
+                                    <label for="body" class="block text-sm font-bold mb-1">Message:</label>
+                                    <textarea id="body" rows="5" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                                </div>
+                                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">Envoyer</button>
+                                <button type="button" id="cancel-compose-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">Annuler</button>
+                            </form>
+                        </div>
+                        <div id="mail-list" class="space-y-4">
+                            <!-- Les emails seront injectés ici -->
+                            <div class="text-center p-8">Chargement des parchemins...</div>
+                        </div>
+                    </div>
+
+                    <div id="view-calendar" class="content-view hidden">
+                        <h2 class="text-2xl font-magic mb-6 text-purple-300">Calendrier des événements astraux</h2>
+                        <div id="event-list" class="space-y-4">
+                            <!-- Les événements seront injectés ici -->
+                            <div class="text-center p-8">Consultation de l'oracle...</div>
+                        </div>
+                    </div>
+
+                    <div id="view-tasks" class="content-view hidden">
+                        <h2 class="text-2xl font-magic mb-6 text-purple-300">Liste des quêtes en cours</h2>
+                         <div class="bg-gray-800 p-4 rounded-lg mb-4">
+                             <form id="add-task-form" class="flex gap-2">
+                                <input type="text" id="new-task-title" placeholder="Nouvelle quête..." required class="flex-grow bg-gray-700 border border-gray-600 rounded p-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">Ajouter</button>
+                            </form>
+                        </div>
+                        <div id="task-list" class="space-y-2">
+                            <!-- Les tâches seront injectées ici -->
+                            <div class="text-center p-8">Déroulement des parchemins...</div>
+                        </div>
+                    </div>
+
+                    <div id="view-documentation" class="content-view hidden">
+                        <h2 class="text-2xl font-magic mb-6 text-purple-300">Documentation du Middleware Simulé</h2>
+                        <div class="bg-gray-800 p-6 rounded-lg prose prose-invert max-w-none">
+                            <p>Dans cette application, le "middleware" n'est pas sur un serveur distant, mais est simulé par un ensemble de fonctions JavaScript dans ce fichier. Ce middleware est responsable de la communication sécurisée avec l'API Microsoft Graph.</p>
+                            
+                            <h3 class="text-purple-300">Flux d'Authentification (OAuth 2.0)</h3>
+                            <ol>
+                                <li><strong>Initialisation</strong>: Au chargement, la librairie <code>MSAL.js</code> est configurée avec un <code>Client ID</code> (à obtenir depuis le portail Azure AD).</li>
+                                <li><strong>Connexion</strong>: L'utilisateur clique sur "Connexion". La fonction <code>auth.signIn()</code> redirige l'utilisateur vers la page de connexion Microsoft.</li>
+                                <li><strong>Obtention du Jeton (Token)</strong>: Après une connexion réussie, Microsoft renvoie un "Access Token". Ce jeton est la clé qui prouve que l'application a le droit d'accéder aux données de l'utilisateur. Il est demandé avec des "scopes" (permissions) spécifiques comme <code>Mail.Read</code>, <code>Mail.Send</code>, etc.</li>
+                                <li><strong>Appels API</strong>: Chaque requête vers l'API Microsoft Graph (ex: pour lire les emails) est envoyée avec ce jeton dans l'en-tête d'autorisation (`Authorization: Bearer VOTRE_JETON`).</li>
+                            </ol>
+
+                            <h3 class="text-purple-300">Fonctions principales du Middleware</h3>
+                            <ul>
+                                <li><code>auth.signIn()</code> / <code>auth.signOut()</code>: Gèrent le cycle de vie de la connexion.</li>
+                                <li><code>auth.getToken()</code>: Obtient ou rafraîchit le jeton d'accès de manière sécurisée.</li>
+                                <li><code>api.callMsGraph(endpoint)</code>: Une fonction centrale pour tous les appels à l'API. Elle s'assure d'abord qu'un jeton valide est disponible via <code>auth.getToken()</code> avant d'envoyer la requête.</li>
+                                <li><code>api.getMails()</code>, <code>api.sendMail(...)</code>, etc.: Fonctions spécifiques qui utilisent <code>callMsGraph</code> pour interagir avec les différents services (Mail, Calendrier, Tâches).</li>
+                            </ul>
+
+                             <h3 class="text-purple-300">Tests Unitaires</h3>
+                            <p>Des tests unitaires simples sont implémentés pour vérifier la logique interne du middleware. Ouvrez la console de développeur (F12) pour voir les résultats de ces tests qui se lancent au démarrage de l'application après connexion.</p>
+                            <button id="run-tests-button" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Relancer les Tests</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+
+        <!-- Zone de notification -->
+        <div id="notification" class="hidden fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-xl transition-opacity duration-300">
+            <!-- Message de notification -->
+        </div>
+
+    </div>
+
+    <script type="module">
+        // ===================================================================================
+        // CONFIGURATION - À MODIFIER PAR L'UTILISATEUR
+        // ===================================================================================
+        // Instructions :
+        // 1. Allez sur https://portal.azure.com/
+        // 2. Cherchez "Inscriptions d'applications" (App registrations)
+        // 3. Créez une nouvelle inscription.
+        // 4. Choisissez "Comptes dans n'importe quel annuaire organisationnel et comptes personnels Microsoft".
+        // 5. Dans la section "Authentification", ajoutez une plateforme "Application monopage (SPA)"
+        //    et mettez l'URL où vous hébergez ce fichier (ex: http://localhost:3000).
+        // 6. Copiez l'ID d'application (client) ci-dessous.
+
+        const msalConfig = {
+            auth: {
+                clientId: "VOTRE_CLIENT_ID_ICI", // <-- IMPORTANT: Mettez votre Client ID ici
+                authority: "https://login.microsoftonline.com/common",
+                redirectUri: window.location.origin,
+            },
+            cache: {
+                cacheLocation: "sessionStorage", // ou "localStorage"
+                storeAuthStateInCookie: false,
+            }
+        };
+
+        const scopes = ["User.Read", "Mail.ReadWrite", "Mail.Send", "Calendars.Read", "Tasks.ReadWrite"];
+
+        // ===================================================================================
+        // MIDDLEWARE SIMULÉ - Logique d'authentification et d'API
+        // ===================================================================================
+        // Cette section agit comme un middleware. Elle gère l'authentification
+        // et encapsule la logique de communication avec l'API Microsoft Graph.
+
+        /**
+         * @module auth
+         * @description Gère l'authentification OAuth 2.0 avec MSAL.
+         */
+        const auth = (() => {
+            const msalInstance = new msal.PublicClientApplication(msalConfig);
+            let account = null;
+
+            async function initialize() {
+                const accounts = msalInstance.getAllAccounts();
+                if (accounts.length > 0) {
+                    account = accounts[0];
+                    msalInstance.setActiveAccount(account);
+                    return account;
+                }
+                return null;
+            }
+
+            async function signIn() {
+                try {
+                    const loginResponse = await msalInstance.loginPopup({ scopes });
+                    account = loginResponse.account;
+                    msalInstance.setActiveAccount(account);
+                    return account;
+                } catch (error) {
+                    console.error("Erreur de connexion:", error);
+                    return null;
+                }
+            }
+
+            function signOut() {
+                const logoutRequest = {
+                    account: msalInstance.getAccountByUsername(account.username)
+                };
+                msalInstance.logoutPopup(logoutRequest);
+                account = null;
+            }
+
+            async function getToken() {
+                if (!account) throw new Error("Utilisateur non connecté.");
+                const request = {
+                    scopes: scopes,
+                    account: account
+                };
+                try {
+                    const response = await msalInstance.acquireTokenSilent(request);
+                    return response.accessToken;
+                } catch (error) {
+                    if (error instanceof msal.InteractionRequiredAuthError) {
+                        return (await msalInstance.acquireTokenPopup(request)).accessToken;
+                    }
+                    console.error("Erreur d'acquisition du jeton:", error);
+                    throw error;
+                }
+            }
+            
+            function getAccount() {
+                return account;
+            }
+
+            return { initialize, signIn, signOut, getToken, getAccount };
+        })();
+
+
+        /**
+         * @module api
+         * @description Fournit des fonctions pour appeler l'API Microsoft Graph.
+         */
+        const api = (() => {
+            const graphEndpoint = "https://graph.microsoft.com/v1.0";
+
+            async function callMsGraph(endpoint, method = 'GET', body = null) {
+                const token = await auth.getToken();
+                if (!token) {
+                    console.error("Aucun jeton disponible.");
+                    return null;
+                }
+
+                const headers = new Headers();
+                const bearer = `Bearer ${token}`;
+                headers.append("Authorization", bearer);
+                if (body) {
+                    headers.append("Content-Type", "application/json");
+                }
+
+                const options = { method, headers };
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                try {
+                    const response = await fetch(`${graphEndpoint}${endpoint}`, options);
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(`Erreur API: ${response.statusText} - ${error.error.message}`);
+                    }
+                     if (response.status === 204 || response.status === 202) { // No content or Accepted
+                        return {};
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error(`Erreur lors de l'appel à ${endpoint}:`, error);
+                    ui.showNotification(`Erreur: ${error.message}`, 'error');
+                    return null;
+                }
+            }
+            
+            return {
+                getProfile: () => callMsGraph("/me"),
+                getMails: (limit = 10) => callMsGraph(`/me/messages?$select=subject,from,receivedDateTime,isRead,bodyPreview&$top=${limit}&$orderby=receivedDateTime desc`),
+                sendMail: (recipient, subject, body) => {
+                    const mail = {
+                        message: {
+                            subject: subject,
+                            body: { contentType: "Text", content: body },
+                            toRecipients: [{ emailAddress: { address: recipient } }]
+                        },
+                        saveToSentItems: "true"
+                    };
+                    return callMsGraph("/me/sendMail", 'POST', mail);
+                },
+                getEvents: (limit = 10) => callMsGraph(`/me/calendar/events?$select=subject,start,end,organizer&$top=${limit}&$orderby=start/dateTime desc`),
+                getTodoLists: () => callMsGraph('/me/todo/lists'),
+                getTasks: (listId, limit = 20) => callMsGraph(`/me/todo/lists/${listId}/tasks?$top=${limit}`),
+                createTask: (listId, title) => {
+                    const task = { title: title };
+                    return callMsGraph(`/me/todo/lists/${listId}/tasks`, 'POST', task);
+                }
+            };
+        })();
+
+
+        // ===================================================================================
+        // FRONT-END - Logique d'interface utilisateur
+        // ===================================================================================
+        /**
+         * @module ui
+         * @description Gère toutes les manipulations du DOM et les interactions utilisateur.
+         */
+        const ui = (() => {
+            const elements = {
+                loginButton: document.getElementById('login-button'),
+                logoutButton: document.getElementById('logout-button'),
+                userProfile: document.getElementById('user-profile'),
+                userName: document.getElementById('user-name'),
+                userEmail: document.getElementById('user-email'),
+                mainContent: document.getElementById('main-content'),
+                navLinks: document.querySelectorAll('.nav-link'),
+                contentViews: document.querySelectorAll('.content-view'),
+                mailList: document.getElementById('mail-list'),
+                eventList: document.getElementById('event-list'),
+                taskList: document.getElementById('task-list'),
+                sendMailForm: document.getElementById('send-mail-form'),
+                addTaskForm: document.getElementById('add-task-form'),
+                notification: document.getElementById('notification'),
+                composeButton: document.getElementById('compose-button'),
+                cancelComposeButton: document.getElementById('cancel-compose-button'),
+                composeView: document.getElementById('compose-view'),
+                runTestsButton: document.getElementById('run-tests-button'),
+            };
+
+            let defaultTodoListId = null;
+
+            function showAuthenticatedUI(account) {
+                elements.loginButton.classList.add('hidden');
+                elements.userProfile.classList.remove('hidden');
+                elements.userProfile.classList.add('flex');
+                elements.userName.textContent = account.name;
+                elements.userEmail.textContent = account.username;
+                elements.mainContent.classList.remove('hidden');
+            }
+
+            function showAnonymousUI() {
+                elements.loginButton.classList.remove('hidden');
+                elements.userProfile.classList.add('hidden');
+                elements.mainContent.classList.add('hidden');
+            }
+            
+            function showNotification(message, type = 'success') {
+                elements.notification.textContent = message;
+                elements.notification.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-xl transition-opacity duration-300 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+                elements.notification.classList.remove('hidden');
+                setTimeout(() => {
+                    elements.notification.classList.add('hidden');
+                }, 3000);
+            }
+
+            function displayMails(data) {
+                if (!data || !data.value) {
+                    elements.mailList.innerHTML = `<p class="text-gray-400">Impossible de charger les emails.</p>`;
+                    return;
+                }
+                if (data.value.length === 0) {
+                     elements.mailList.innerHTML = `<p class="text-gray-400">Aucun message dans votre grimoire.</p>`;
+                    return;
+                }
+                elements.mailList.innerHTML = data.value.map(mail => `
+                    <div class="bg-gray-800 p-4 rounded-lg border-l-4 ${mail.isRead ? 'border-gray-600' : 'border-purple-500'}">
+                        <p class="font-bold">${mail.from.emailAddress.name}</p>
+                        <p class="text-purple-300">${mail.subject}</p>
+                        <p class="text-sm text-gray-400 mt-1">${mail.bodyPreview.substring(0,100)}...</p>
+                        <p class="text-xs text-gray-500 text-right mt-2">${new Date(mail.receivedDateTime).toLocaleString('fr-FR')}</p>
+                    </div>
+                `).join('');
+            }
+            
+            function displayEvents(data) {
+                if (!data || !data.value) {
+                    elements.eventList.innerHTML = `<p class="text-gray-400">Impossible de charger les événements.</p>`;
+                    return;
+                }
+                 if (data.value.length === 0) {
+                     elements.eventList.innerHTML = `<p class="text-gray-400">Aucun événement prévu dans votre oracle.</p>`;
+                    return;
+                }
+                elements.eventList.innerHTML = data.value.map(event => `
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <p class="font-bold text-purple-300">${event.subject}</p>
+                        <p class="text-sm">De: ${new Date(event.start.dateTime).toLocaleString('fr-FR')}</p>
+                        <p class="text-sm">À: ${new Date(event.end.dateTime).toLocaleString('fr-FR')}</p>
+                        <p class="text-xs text-gray-400">Organisé par: ${event.organizer.emailAddress.name}</p>
+                    </div>
+                `).join('');
+            }
+            
+            async function displayTasks() {
+                // Find the default "Tasks" list first
+                if (!defaultTodoListId) {
+                    const lists = await api.getTodoLists();
+                    if (lists && lists.value) {
+                        const defaultList = lists.value.find(list => list.wellknownListName === 'defaultList');
+                        if (defaultList) {
+                            defaultTodoListId = defaultList.id;
+                        } else if (lists.value.length > 0) {
+                            defaultTodoListId = lists.value[0].id; // Fallback to the first list
+                        }
+                    }
+                }
+
+                if (!defaultTodoListId) {
+                     elements.taskList.innerHTML = `<p class="text-gray-400">Aucune liste de tâches trouvée.</p>`;
+                     return;
+                }
+
+                const data = await api.getTasks(defaultTodoListId);
+                if (!data || !data.value) {
+                    elements.taskList.innerHTML = `<p class="text-gray-400">Impossible de charger les quêtes.</p>`;
+                    return;
+                }
+                if (data.value.length === 0) {
+                     elements.taskList.innerHTML = `<p class="text-gray-400">Aucune quête sur vos parchemins.</p>`;
+                    return;
+                }
+                elements.taskList.innerHTML = data.value.map(task => `
+                    <div class="bg-gray-800 p-3 rounded-lg flex items-center">
+                        <span class="flex-grow ${task.status === 'completed' ? 'line-through text-gray-500' : ''}">${task.title}</span>
+                    </div>
+                `).join('');
+            }
+
+            function setupEventListeners() {
+                elements.loginButton.addEventListener('click', async () => {
+                    const account = await auth.signIn();
+                    if (account) {
+                        showAuthenticatedUI(account);
+                        navigateTo('inbox');
+                        runUnitTests(); // Run tests after login
+                    }
+                });
+
+                elements.logoutButton.addEventListener('click', () => {
+                    auth.signOut();
+                    showAnonymousUI();
+                });
+
+                elements.navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = e.target.dataset.target;
+                        navigateTo(targetId);
+                    });
+                });
+                
+                elements.composeButton.addEventListener('click', () => {
+                   elements.composeView.classList.remove('hidden');
+                });
+                
+                elements.cancelComposeButton.addEventListener('click', () => {
+                    elements.composeView.classList.add('hidden');
+                    elements.sendMailForm.reset();
+                });
+
+                elements.sendMailForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const recipient = document.getElementById('recipient').value;
+                    const subject = document.getElementById('subject').value;
+                    const body = document.getElementById('body').value;
+                    
+                    showNotification('Envoi de la chouette...', 'info');
+                    const result = await api.sendMail(recipient, subject, body);
+                    if (result) {
+                        showNotification('Chouette envoyée avec succès !');
+                        elements.sendMailForm.reset();
+                        elements.composeView.classList.add('hidden');
+                    } else {
+                        showNotification('Échec de l\'envoi.', 'error');
+                    }
+                });
+
+                elements.addTaskForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (!defaultTodoListId) {
+                         showNotification('Liste de tâches par défaut non trouvée.', 'error');
+                         return;
+                    }
+                    const titleInput = document.getElementById('new-task-title');
+                    const title = titleInput.value;
+                    const result = await api.createTask(defaultTodoListId, title);
+                    if(result) {
+                        showNotification('Quête ajoutée !');
+                        titleInput.value = '';
+                        displayTasks(); // Refresh list
+                    }
+                });
+
+                elements.runTestsButton.addEventListener('click', runUnitTests);
+            }
+
+            function navigateTo(viewId) {
+                elements.contentViews.forEach(view => view.classList.add('hidden'));
+                document.getElementById(`view-${viewId}`).classList.remove('hidden');
+
+                elements.navLinks.forEach(link => {
+                    link.classList.remove('active-link', 'bg-purple-500', 'bg-opacity-20');
+                    if (link.dataset.target === viewId) {
+                        link.classList.add('active-link', 'bg-purple-500', 'bg-opacity-20');
+                    }
+                });
+
+                // Load data for the active view
+                switch (viewId) {
+                    case 'inbox':
+                        api.getMails().then(displayMails);
+                        break;
+                    case 'calendar':
+                        api.getEvents().then(displayEvents);
+                        break;
+                    case 'tasks':
+                        displayTasks();
+                        break;
+                }
+            }
+
+            return { showAuthenticatedUI, showAnonymousUI, showNotification, setupEventListeners, navigateTo };
+        })();
+
+
+        // ===================================================================================
+        // TESTS UNITAIRES SIMULÉS
+        // ===================================================================================
+        // Cette section démontre comment des tests unitaires pourraient être
+        // implémentés pour le middleware. Les résultats sont affichés dans la console.
+
+        function runUnitTests() {
+            console.group("Résultats des Tests Unitaires du Middleware Simulé");
+
+            // Test 1: Vérifie que l'objet msalConfig a un clientId (même si c'est un placeholder)
+            try {
+                if (msalConfig.auth.clientId && msalConfig.auth.clientId !== "VOTRE_CLIENT_ID_ICI") {
+                    console.log("✅ [PASS] Test 1: `msalConfig.auth.clientId` est configuré.");
+                } else {
+                    throw new Error("Le Client ID est un placeholder. Veuillez le configurer.");
+                }
+            } catch (e) {
+                console.error(`❌ [FAIL] Test 1: ${e.message}`);
+            }
+
+            // Test 2: Vérifie que la fonction getToken() renvoie une erreur si non connecté
+            async function testGetTokenWhenLoggedOut() {
+                // Simule être déconnecté
+                if (!auth.getAccount()) {
+                    try {
+                        await auth.getToken();
+                        console.error("❌ [FAIL] Test 2: getToken() n'a pas levé d'erreur alors qu'il le devrait.");
+                    } catch (e) {
+                        if (e.message.includes("Utilisateur non connecté")) {
+                           console.log("✅ [PASS] Test 2: getToken() a correctement levé une erreur lorsque déconnecté.");
+                        } else {
+                           console.error("❌ [FAIL] Test 2: getToken() a levé une erreur inattendue:", e.message);
+                        }
+                    }
+                } else {
+                    console.log("✅ [SKIP] Test 2: L'utilisateur est connecté, test non pertinent.");
+                }
+            }
+            testGetTokenWhenLoggedOut();
+            
+            // Test 3: Vérification de l'existence des fonctions API
+            try {
+                const apiFunctions = ['getProfile', 'getMails', 'sendMail', 'getEvents', 'getTasks'];
+                let allExist = true;
+                for (const func of apiFunctions) {
+                    if (typeof api[func] !== 'function') {
+                        console.error(`La fonction api.${func} est manquante.`);
+                        allExist = false;
+                    }
+                }
+                if (allExist) {
+                    console.log("✅ [PASS] Test 3: Toutes les fonctions principales de l'API sont présentes.");
+                } else {
+                     throw new Error("Certaines fonctions API sont manquantes.");
+                }
+            } catch(e) {
+                 console.error(`❌ [FAIL] Test 3: ${e.message}`);
+            }
+
+            console.groupEnd();
+        }
+
+
+        // ===================================================================================
+        // POINT D'ENTRÉE DE L'APPLICATION
+        // ===================================================================================
+        async function main() {
+            ui.setupEventListeners();
+            const account = await auth.initialize();
+            if (account) {
+                ui.showAuthenticatedUI(account);
+                ui.navigateTo('inbox');
+                runUnitTests();
+            } else {
+                ui.showAnonymousUI();
+            }
+        }
+
+        main();
+
+    </script>
+</body>
+</html>
