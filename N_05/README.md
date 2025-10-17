@@ -1,5 +1,13 @@
 ﻿# Dossier Projet n°5
 
+Dernier run de la Pipeline :
+https://github.com/GTGpuke/Workshop-2025/actions/runs/18529571018
+
+Dernier report Sonarqube :
+https://sonarcloud.io/dashboard?id=GTGpuke_Workshop-2025&pullRequest=6
+
+### Liens Conversations Gemini
+
 https://g.co/gemini/share/14c162885e57 (Tout sauf Docker)
 https://g.co/gemini/share/d94281e30acd (Ajout Docker)
 

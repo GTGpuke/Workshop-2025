@@ -1,5 +1,7 @@
 ﻿# Dossier Projet n°2
 
+### Liens Conversations Gemini
+
 https://g.co/gemini/share/e234d0e0e2ad
 
 ## Pracadabra

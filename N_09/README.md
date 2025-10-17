@@ -1,5 +1,7 @@
 ﻿# Dossier Projet n°9
 
+### Liens Conversations Gemini
+
 https://g.co/gemini/share/d740d04209d2 (Image renard initiale)
 https://g.co/gemini/share/0fe4752f109a (Images serpent)
 https://g.co/gemini/share/acd802f80746 (Page web, intégration images)
